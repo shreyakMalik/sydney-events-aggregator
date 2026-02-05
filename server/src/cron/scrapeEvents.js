@@ -11,6 +11,7 @@ export async function scrapeEvents() {
 
   const events = [...eventbriteEvents, ...alleventsEvents];
 
+  // 🔹 NORMAL INSERT FLOW
   for (const e of events) {
     const exists = await db.get(
       "SELECT id FROM events WHERE sourceUrl = ?",
@@ -40,5 +41,45 @@ export async function scrapeEvents() {
     }
   }
 
-  console.log(`✅ ${events.length} events processed`);
+  // 🔹 SEED FALLBACK (IMPORTANT PART)
+  if (events.length === 0) {
+    console.log("⚠️ No live events found. Seeding demo data...");
+
+    const seedEvents = [
+      {
+        title: "Sydney Tech Meetup (Demo)",
+        city: "Sydney",
+        description: "Sample seeded event for project demonstration.",
+        source: "Demo",
+        sourceUrl: "https://example.com/demo-tech"
+      },
+      {
+        title: "Sydney Music Night (Demo)",
+        city: "Sydney",
+        description: "Sample seeded event for project demonstration.",
+        source: "Demo",
+        sourceUrl: "https://example.com/demo-music"
+      }
+    ];
+
+    for (const e of seedEvents) {
+      await db.run(
+        `
+        INSERT OR IGNORE INTO events
+        (title, city, description, source, sourceUrl, status, lastScrapedAt)
+        VALUES (?, ?, ?, ?, ?, 'demo', ?)
+        `,
+        [
+          e.title,
+          e.city,
+          e.description,
+          e.source,
+          e.sourceUrl,
+          now
+        ]
+      );
+    }
+  }
+
+  console.log("✅ Scraping completed");
 }
