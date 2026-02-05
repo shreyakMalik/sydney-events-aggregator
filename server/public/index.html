@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sydney Events</title>
+
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --eventbrite: #f05537;
+      --allevents: #2563eb;
+      --border: #e2e8f0;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, #0f172a, #2563eb);
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 32px;
+    }
+
+    header p {
+      margin-top: 8px;
+      font-size: 15px;
+      opacity: 0.9;
+    }
+
+    /* Layout */
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    /* Event Card */
+    .event {
+      background-color: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .event:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .event h3 {
+      margin: 8px 0;
+      font-size: 18px;
+    }
+
+    .event p {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .event a {
+      display: inline-block;
+      margin-top: 10px;
+      color: var(--allevents);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .event a:hover {
+      text-decoration: underline;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      font-size: 11px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .badge-eventbrite {
+      background-color: var(--eventbrite);
+      color: white;
+    }
+
+    .badge-allevents {
+      background-color: var(--allevents);
+      color: white;
+    }
+
+    /* Empty state */
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 40px;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Sydney Events</h1>
+    <p>Discover live events happening around Sydney</p>
+  </header>
+
+  <div class="container">
+    <div id="events"></div>
+  </div>
+
+  <script>
+    fetch("/events")
+      .then(res => res.json())
+      .then(events => {
+        const container = document.getElementById("events");
+
+        if (!events.length) {
+          container.innerHTML =
+            '<div class="empty">No events yet. Try <code>/scrape</code> first.</div>';
+          return;
+        }
+
+        events.forEach(e => {
+          const div = document.createElement("div");
+          div.className = "event";
+
+          const sourceClass =
+            e.source === "Eventbrite"
+              ? "badge-eventbrite"
+              : "badge-allevents";
+
+          div.innerHTML = `
+            <span class="badge ${sourceClass}">
+              ${e.source}
+            </span>
+            <h3>${e.title}</h3>
+            <p>${e.description || ""}</p>
+            <a href="${e.sourceUrl}" target="_blank">Get Tickets →</a>
+          `;
+
+          container.appendChild(div);
+        });
+      });
+  </script>
+</body>
+</html>
