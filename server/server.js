@@ -16,11 +16,16 @@ app.get("/scrape", async (req, res) => {
 });
 
 // get events
-app.get("/events", (req, res) => {
-  const events = db
-    .prepare("SELECT * FROM events ORDER BY lastScrapedAt DESC")
-    .all();
-  res.json(events);
+app.get("/events", async (req, res) => {
+  try {
+    const events = await db.all(
+      "SELECT * FROM events ORDER BY id DESC"
+    );
+    res.json(events);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch events" });
+  }
 });
 
 const PORT = process.env.PORT || 5000;
