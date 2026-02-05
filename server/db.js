@@ -1,8 +1,14 @@
-import Database from "better-sqlite3";
+import sqlite3 from "sqlite3";
+import { open } from "sqlite";
 
-const db = new Database("events.db");
+// Open database (creates events.db automatically)
+const db = await open({
+  filename: "./events.db",
+  driver: sqlite3.Database,
+});
 
-db.prepare(`
+// Create table if it doesn't exist
+await db.exec(`
   CREATE TABLE IF NOT EXISTS events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT,
@@ -19,6 +25,7 @@ db.prepare(`
     importedAt TEXT,
     importedBy TEXT
   )
-`).run();
+`);
 
 export default db;
+
